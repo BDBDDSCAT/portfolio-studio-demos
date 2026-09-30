@@ -43,7 +43,7 @@ let params = { ...INITIAL },
   erasing = false,
   keyboard = false,
   cursor = { x: 256, y: 256 };
-const worker = new Worker(new URL('./worker.js', import.meta.url), { type: 'module' });
+const worker = new Worker(new URL('./worker.js?v=2.0.0', import.meta.url), { type: 'module' });
 const EN = {
   heading: 'Wave propagation workbench',
   description:
