@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#163f36" />
+    <meta
+      name="description"
+      content="A tiny Fourier optics lab in your browser. Explore diffraction, draw an aperture, and export the result. No install, no account, no server."
+    />
+    <title>Wavebench — 光の実験室</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./src/style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="./" aria-label="Wavebench home"
+        ><svg viewBox="0 0 32 32" aria-hidden="true">
+          <path
+            d="M2 16C6 1 10 1 14 16s8 15 12 0M2 23C6 8 10 8 14 23s8 15 12 0"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          /></svg
+        ><span>wavebench<span class="brand-jp">光の実験室</span></span></a
+      >
+      <nav aria-label="Main navigation">
+        <a href="https://github.com/BDBDDSCAT/portfolio-studio-demos/tree/main/wavebench" target="_blank" rel="noopener">GitHub ↗</a
+        ><button id="language" class="text-button" aria-label="Switch to Chinese">中文</button>
+      </nav>
+    </header>
+    <main>
+      <section class="intro">
+        <div>
+          <p class="eyebrow" data-i18n="eyebrow">A SMALL LAB FOR A CURIOUS MIND</p>
+          <h1 data-i18n="headline">Let light show<br /><em>its work.</em></h1>
+        </div>
+        <div class="intro-side">
+          <p data-i18n="intro">
+            An aperture. A wave. A pattern.<br />Explore the quiet geometry of diffraction —<br />right
+            here in your browser.
+          </p>
+          <div class="local-tag">
+            <span></span><span data-i18n="local">Runs locally · No install · Open source</span>
+          </div>
+        </div>
+        <div class="hero-wave" aria-hidden="true">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+      </section>
+      <section class="laboratory" aria-label="Interactive diffraction laboratory">
+        <div class="lab-heading">
+          <span class="eyebrow" data-i18n="bench">01 / THE OPTICAL BENCH</span
+          ><span class="lab-status"
+            ><span id="status-dot"></span
+            ><span id="status" role="status" aria-live="polite">Preparing experiment…</span></span
+          >
+        </div>
+        <div class="bench-grid">
+          <aside class="controls">
+            <div class="control-section">
+              <h2 data-i18n="experiment">Choose an experiment</h2>
+              <div class="preset-grid" id="presets">
+                <button data-preset="double" class="active" aria-pressed="true">
+                  <span class="preset-icon">| |</span><span data-i18n="double">Double slit</span>
+                </button>
+                <button data-preset="single" aria-pressed="false">
+                  <span class="preset-icon">|</span><span data-i18n="single">Single slit</span>
+                </button>
+                <button data-preset="grating" aria-pressed="false">
+                  <span class="preset-icon">|||||</span><span data-i18n="grating">Grating</span>
+                </button>
+                <button data-preset="circle" aria-pressed="false">
+                  <span class="preset-icon">●</span><span data-i18n="circle">Circular</span>
+                </button>
+                <button data-preset="annulus" aria-pressed="false">
+                  <span class="preset-icon">◎</span><span data-i18n="annulus">Annular</span>
+                </button>
+                <button data-preset="vortex" aria-pressed="false">
+                  <span class="preset-icon">◉</span><span data-i18n="vortex">Vortex</span>
+                </button>
+                <button data-preset="custom" class="custom-preset" aria-pressed="false">
+                  <span class="preset-icon">✎</span><span data-i18n="custom">Draw your own</span>
+                </button>
+              </div>
+            </div>
+            <div class="control-section geometry">
+              <h2 data-i18n="geometry">Aperture geometry</h2>
+              <div class="range-control" data-for="widthMm">
+                <label for="widthMm" data-i18n="width">Slit width</label
+                ><output for="widthMm" id="widthMm-value"></output
+                ><input
+                  type="range"
+                  id="widthMm"
+                  min="0.125"
+                  max="0.8"
+                  step="0.0125"
+                  value="0.225"
+                />
+              </div>
+              <div class="range-control" data-for="heightMm">
+                <label for="heightMm" data-i18n="height">Slit height</label
+                ><output for="heightMm" id="heightMm-value"></output
+                ><input type="range" id="heightMm" min="0.25" max="4" step="0.05" value="1.5" />
+              </div>
+              <div class="range-control" data-for="separationMm">
+                <label for="separationMm" data-i18n="separation">Centre spacing</label
+                ><output for="separationMm" id="separationMm-value"></output
+                ><input
+                  type="range"
+                  id="separationMm"
+                  min="0.25"
+                  max="1.5"
+                  step="0.025"
+                  value="1"
+                />
+              </div>
+              <div class="range-control" data-for="count">
+                <label for="count" data-i18n="count">Number of slits</label
+                ><output for="count" id="count-value"></output
+                ><input type="range" id="count" min="2" max="7" step="1" value="5" />
+              </div>
+              <div class="range-control" data-for="diameterMm">
+                <label for="diameterMm" data-i18n="diameter">Outer diameter</label
+                ><output for="diameterMm" id="diameterMm-value"></output
+                ><input type="range" id="diameterMm" min="0.25" max="3" step="0.05" value="1.6" />
+              </div>
+              <div class="range-control" data-for="innerDiameterMm">
+                <label for="innerDiameterMm" data-i18n="inner">Inner diameter</label
+                ><output for="innerDiameterMm" id="innerDiameterMm-value"></output
+                ><input
+                  type="range"
+                  id="innerDiameterMm"
+                  min="0.1"
+                  max="2.95"
+                  step="0.05"
+                  value="1"
+                />
+              </div>
+              <div class="range-control" data-for="charge">
+                <label for="charge" data-i18n="charge">Vortex charge</label
+                ><output for="charge" id="charge-value"></output
+                ><input type="range" id="charge" min="1" max="5" step="1" value="1" />
+              </div>
+              <div id="drawing-controls" hidden>
+                <p class="small-text" data-i18n="drawHint">
+                  Draw on the aperture. Hold Shift to erase.
+                </p>
+                <div class="range-control">
+                  <label for="brush" data-i18n="brush">Brush diameter</label
+                  ><output for="brush" id="brush-value">0.40 mm</output
+                  ><input id="brush" type="range" min="0.1" max="1.2" step="0.05" value="0.4" />
+                </div>
+                <div class="drawing-buttons">
+                  <button id="erase" aria-pressed="false" data-i18n="erase">Eraser</button
+                  ><button id="clear" data-i18n="clear">Clear</button>
+                </div>
+              </div>
+            </div>
+            <div class="control-section">
+              <h2 data-i18n="light">Light & lens</h2>
+              <div class="range-control spectral-control">
+                <label for="wavelengthNm" data-i18n="wavelength">Wavelength</label
+                ><output for="wavelengthNm" id="wavelengthNm-value"></output
+                ><input type="range" id="wavelengthNm" min="380" max="750" step="1" value="532" />
+              </div>
+              <div class="range-control">
+                <label for="focalLengthMm" data-i18n="focal">Lens focal length</label
+                ><output for="focalLengthMm" id="focalLengthMm-value"></output
+                ><input
+                  type="range"
+                  id="focalLengthMm"
+                  min="200"
+                  max="1000"
+                  step="10"
+                  value="500"
+                />
+              </div>
+            </div>
+            <button id="reset" class="reset-button" data-i18n="reset">
+              ↺ Reset this experiment
+            </button>
+          </aside>
+          <div class="workspace">
+            <div class="visuals">
+              <section class="visual-panel">
+                <div class="panel-heading">
+                  <h2 data-i18n="aperture">The aperture</h2>
+                  <span id="aperture-kind">AMPLITUDE</span>
+                </div>
+                <div class="canvas-wrap aperture-wrap">
+                  <canvas
+                    id="aperture"
+                    width="512"
+                    height="512"
+                    tabindex="0"
+                    aria-label="Aperture amplitude and phase preview"
+                  ></canvas
+                  ><span class="canvas-corner" data-i18n="inputPlane">INPUT PLANE</span
+                  ><span class="canvas-scale">8 × 8 mm</span>
+                  <div class="draw-overlay" id="draw-overlay" hidden data-i18n="drawOn">
+                    Draw light here ↗
+                  </div>
+                </div>
+                <p class="panel-caption" id="aperture-caption"></p>
+              </section>
+              <section class="visual-panel">
+                <div class="panel-heading">
+                  <h2 data-i18n="pattern">The diffraction</h2>
+                  <select id="displayMode" aria-label="Intensity display">
+                    <option value="log" data-i18n="log">Log contrast</option>
+                    <option value="linear" data-i18n="linear">Linear intensity</option>
+                  </select>
+                </div>
+                <div class="canvas-wrap">
+                  <canvas
+                    id="diffraction"
+                    width="640"
+                    height="640"
+                    aria-label="Diffraction relative intensity in the lens focal plane"
+                  ></canvas
+                  ><span class="canvas-corner" data-i18n="focalPlane">BACK FOCAL PLANE</span
+                  ><span class="canvas-scale" id="screen-scale"></span>
+                </div>
+                <div class="pattern-caption">
+                  <p class="panel-caption" data-i18n="normalized">Relative intensity · peak = 1</p>
+                  <label for="viewSpanMm" class="view-label"
+                    ><span data-i18n="view">View</span
+                    ><select id="viewSpanMm">
+                      <option value="2">2 mm</option>
+                      <option value="4" selected>4 mm</option>
+                      <option value="8">8 mm</option>
+                      <option value="16">16 mm</option>
+                    </select></label
+                  >
+                </div>
+              </section>
+            </div>
+            <div class="readout">
+              <div>
+                <span data-i18n="measureLabel" id="measure-label">Fringe spacing</span
+                ><strong id="measure-value">—</strong><small id="measure-formula">λf / d</small>
+              </div>
+              <div>
+                <span data-i18n="sample">Aperture sampling</span><strong>15.625 <i>µm</i></strong
+                ><small>512 × 512 / 8 mm</small>
+              </div>
+              <div>
+                <span data-i18n="transmission">Transmitting area</span
+                ><strong id="area-value">—</strong
+                ><small data-i18n="unitIllumination">Unit incident amplitude</small>
+              </div>
+            </div>
+            <section class="cross-section">
+              <div class="section-heading">
+                <h2 data-i18n="cutTitle">A slice through the centre</h2>
+                <span data-i18n="cutType">LINEAR INTENSITY / y = 0</span>
+              </div>
+              <canvas
+                id="profile"
+                width="1100"
+                height="170"
+                aria-label="Central horizontal intensity cross section"
+              ></canvas>
+              <div class="chart-legend">
+                <span id="chart-left">−2 mm</span
+                ><span data-i18n="position">Position in focal plane (mm)</span
+                ><span id="chart-right">+2 mm</span>
+              </div>
+            </section>
+            <div class="actions">
+              <button id="exportPng" class="primary-button">
+                <span aria-hidden="true">↓</span
+                ><span data-i18n="png">Export experiment PNG</span></button
+              ><button id="exportCsv" data-i18n="csv">Intensity CSV</button
+              ><button id="share" data-i18n="share">Copy experiment link</button>
+              <details class="session-menu">
+                <summary data-i18n="session">Session</summary>
+                <div>
+                  <button id="saveSession" data-i18n="save">Save JSON</button
+                  ><button id="loadSession" data-i18n="load">Load JSON</button
+                  ><input type="file" id="sessionFile" accept="application/json,.json" hidden />
+                </div>
+              </details>
+            </div>
+            <p id="notice" role="status" aria-live="polite"></p>
+          </div>
+        </div>
+      </section>
+      <section class="field-notes">
+        <div>
+          <p class="eyebrow" data-i18n="notesLabel">02 / A NOTE FROM THE BENCH</p>
+          <h2 data-i18n="notesTitle">Small openings.<br />Unexpected worlds.</h2>
+        </div>
+        <div>
+          <p id="experiment-note"></p>
+          <p class="physics-note" data-i18n="physicsNote">
+            This is scalar, monochromatic Fraunhofer diffraction in a lens’s focal plane. Each
+            pattern is normalized separately. The grid is finite; very small details are
+            approximate.
+          </p>
+          <a
+            href="https://github.com/BDBDDSCAT/portfolio-studio-demos/blob/main/wavebench/docs/physics.md"
+            target="_blank"
+            rel="noopener"
+            data-i18n="physicsLink"
+            >Read the model & its limits ↗</a
+          >
+        </div>
+      </section>
+    </main>
+    <footer>
+      <span
+        >Wavebench ·
+        <span data-i18n="footer">Made for the pleasure of figuring things out.</span></span
+      ><a href="https://github.com/BDBDDSCAT" target="_blank" rel="noopener">BDBDDSCAT ↗</a>
+    </footer>
+    <dialog id="linkDialog">
+      <form method="dialog">
+        <h2 data-i18n="linkTitle">Your experiment link</h2>
+        <input id="linkFallback" readonly aria-label="Experiment link" />
+        <p data-i18n="linkHint">Select and copy the link to share this setup.</p>
+        <button data-i18n="close">Close</button>
+      </form>
+    </dialog>
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>
