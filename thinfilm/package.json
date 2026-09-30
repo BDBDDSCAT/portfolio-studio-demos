@@ -1,0 +1,21 @@
+{
+  "name": "thinfilm",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Passive multilayer optical scattering, with a browser instrument and dependency-free CLI.",
+  "license": "MIT",
+  "bin": {
+    "thinfilm": "./bin/thinfilm.js"
+  },
+  "exports": {
+    ".": "./src/thinfilm.js"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "serve": "node bin/serve.js"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

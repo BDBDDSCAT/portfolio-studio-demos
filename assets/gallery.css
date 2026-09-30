@@ -2,3 +2,5 @@ body{background:#f7f8fc;color:#151c2d}.site-header{padding:28px 0;display:flex;a
 .brand-symbol{letter-spacing:0;padding-right:0;font-size:21px}.work-note .bracket{letter-spacing:3px}
 
 .wavebench-card .work-visual{background:#071812}.wavebench-card .work-visual img{object-position:center 22%}.work-note{grid-column:1/-1}
+
+.scientific-card .work-visual{background:#0c1117}.scientific-card .work-visual img{object-position:center top}

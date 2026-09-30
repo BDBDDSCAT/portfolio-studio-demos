@@ -1,0 +1,54 @@
+name: Scientific tools checks
+on:
+  push:
+    branches: [main]
+    paths: ['wavebench/src/**', 'thinfilm/**', 'tracefit/**', 'runcheck/**', 'tools/**', 'tools-tests/**', 'README.md', 'index.html', 'assets/gallery.css', '.github/workflows/scientific-tools.yml']
+  pull_request:
+    paths: ['wavebench/src/**', 'thinfilm/**', 'tracefit/**', 'runcheck/**', 'tools/**', 'tools-tests/**', 'README.md', 'index.html', 'assets/gallery.css', '.github/workflows/scientific-tools.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  numerical:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [thinfilm, tracefit, runcheck]
+    defaults:
+      run:
+        working-directory: ${{ matrix.project }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm test
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test tools/tests/workflows.test.mjs
+  browser:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: tools-tests
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: tools-tests/package-lock.json
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm test
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: scientific-tools-browser-results
+          path: tools-tests/test-results/

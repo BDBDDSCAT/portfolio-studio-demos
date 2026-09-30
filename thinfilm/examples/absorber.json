@@ -1,0 +1,5 @@
+{
+  "incident": 1,
+  "substrate": 1.5,
+  "layers": [{ "n": 2, "k": 0.5, "dNm": 300 }]
+}

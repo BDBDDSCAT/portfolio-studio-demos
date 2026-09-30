@@ -6,3 +6,8 @@ __pycache__/
 output/
 build/
 docs/*reference.md
+runcheck/reports/
+thinfilm/out/
+tracefit/out/
+tools-tests/test-results/
+tools-tests/playwright-report/

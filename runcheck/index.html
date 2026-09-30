@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Local CSV quality checks: typed columns, composite keys, grouped monotonic order, conservation sums, and reproducible SHA-256 reports.">
+    <title>Runcheck · CSV quality audit</title>
+    <link rel="stylesheet" href="./src/style.css">
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+</head>
+  <body>
+    <main>
+      <header class="topbar">
+        <div><a class="brand" href="./">Runcheck</a><span class="version">v1.0.0</span><p data-i18n="subtitle">CSV quality checks for numerical experiments.</p></div>
+        <div class="header-controls"><a href="./docs/schema.md" data-i18n="schemaReference">Schema reference</a><a href="https://github.com/bdbddscat/portfolio-studio-demos/tree/main/runcheck" target="_blank" rel="noreferrer">GitHub</a><label class="sr-only" for="language">Language / 语言</label><select id="language" aria-label="Language"><option value="en">English</option><option value="zh">中文</option></select></div>
+      </header>
+      <div class="intro"><span class="tag" data-i18n="local">Local processing</span><p data-i18n="intro">Audit types, ranges, keys, input order and conservation sums. Keep exact source hashes with the result.</p></div>
+      <section class="workbench" aria-label="Audit inputs">
+        <div class="panel">
+          <div class="panel-heading"><h1 data-i18n="csvTitle">01 / CSV data</h1><label class="file-button" for="csv-file" data-i18n="importCSV">Import CSV</label><input type="file" id="csv-file" accept=".csv,.tsv,.txt,text/csv,text/tab-separated-values" class="file-input"></div>
+          <p id="input-meta" class="meta"></p>
+          <label class="sr-only" for="csv-input" data-i18n="csvLabel">CSV text</label><textarea id="csv-input" spellcheck="false" aria-label="CSV text"></textarea>
+          <div class="input-options"><label for="delimiter" data-i18n="delimiter">Delimiter</label><select id="delimiter"><option value="comma" data-i18n="comma">Comma (,)</option><option value="tab" data-i18n="tab">Tab (⇥)</option><option value="semicolon" data-i18n="semicolon">Semicolon (;)</option></select><span class="meta" data-i18n="noGuess">Explicit selection; no guessing.</span></div>
+        </div>
+        <div class="panel">
+          <div class="panel-heading"><h2 data-i18n="schemaTitle">02 / Schema JSON</h2><label class="file-button" for="schema-file" data-i18n="importSchema">Import schema</label><input type="file" id="schema-file" accept=".json,application/json" class="file-input"></div>
+          <p id="schema-meta" class="meta"></p>
+          <label class="sr-only" for="schema-input" data-i18n="schemaLabel">Schema JSON text</label><textarea id="schema-input" spellcheck="false" aria-label="Schema JSON text"></textarea>
+          <p class="schema-hint" data-i18n="schemaHint">Schema v1: number / integer / string, nullable, bounds, enum, composite keys, grouped order and sums with absolute tolerance.</p>
+        </div>
+      </section>
+      <div class="audit-actions"><button id="audit-button" class="primary" data-i18n="audit">Audit data</button><span data-i18n="synthetic">Synthetic fixtures:</span><button id="sample-clean" data-i18n="clean">Clean</button><button id="sample-broken" data-i18n="broken">Broken</button><label for="max-issues" data-i18n="cap">Issue example cap</label><input id="max-issues" type="number" min="0" max="10000" step="1" value="100" aria-label="Issue example cap"></div>
+      <p id="status-message" role="status" aria-live="polite">Loading bundled synthetic data…</p>
+      <section id="report-area" hidden>
+        <div class="report-heading"><h2 data-i18n="reportTitle">03 / Audit report</h2><div class="downloads"><button id="download-json" disabled data-i18n="downloadJSON">Download JSON</button><button id="download-html" disabled data-i18n="downloadHTML">Download HTML</button></div></div>
+        <div id="report-summary" class="summary"></div>
+        <div class="hashes"><div><span data-i18n="inputHash">Input SHA-256</span><code id="input-hash"></code></div><div><span data-i18n="schemaHash">Schema SHA-256</span><code id="schema-hash"></code></div><p data-i18n="hashNote">Uploaded files are hashed from their original bytes. Pasted text is hashed as UTF-8. Line endings and BOM change the hash.</p></div>
+        <div class="table-heading"><h3 data-i18n="profiles">Column profiles</h3><span data-i18n="profileNote">Finite values, including range failures. Sample standard deviation uses n−1.</span></div>
+        <div class="table-scroll"><table id="profiles-table"><thead><tr><th data-i18n="column">Column</th><th data-i18n="type">Type</th><th data-i18n="valid">Valid</th><th data-i18n="null">Null</th><th data-i18n="invalid">Invalid</th><th>Min</th><th>Max</th><th data-i18n="mean">Mean</th><th data-i18n="std">Sample std.</th></tr></thead><tbody></tbody></table></div>
+        <div class="table-heading"><h3 data-i18n="issues">Issues</h3><span id="issue-cap-note"></span></div>
+        <div class="table-scroll"><table id="issues-table"><thead><tr><th data-i18n="record">Record</th><th data-i18n="sourceLine">Source line</th><th data-i18n="column">Column</th><th data-i18n="code">Code</th><th data-i18n="message">Message</th></tr></thead><tbody></tbody></table></div>
+        <p class="report-note" data-i18n="recordNote">Data records start at 1; record 0 identifies header issues. Source line is the physical start line, including quoted multiline records. Counts remain exact when examples are capped.</p>
+      </section>
+      <footer><p data-i18n="footer">Read-only audit. Files stay in your browser; no account, upload service or runtime dependency.</p><code>node cli.js audit --input examples/clean.csv --schema examples/schema.json --out out</code></footer>
+    </main>
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>

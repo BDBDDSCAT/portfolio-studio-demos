@@ -1,0 +1,7 @@
+sample,wavelength_nm,R,T,A
+sample-a,400,0.10,0.80,0.10
+sample-a,500,0.11,0.79,0.10
+sample-a,600,0.12,0.78,0.10
+sample-b,400,0.20,0.70,0.10
+sample-b,500,0.21,0.69,0.10
+sample-b,600,0.22,0.68,0.10

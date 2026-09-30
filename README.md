@@ -1,4 +1,39 @@
-# 表とコードの整備室
+# J_photonics · scientific tools
+
+[![Scientific tools checks](https://github.com/BDBDDSCAT/portfolio-studio-demos/actions/workflows/scientific-tools.yml/badge.svg)](https://github.com/BDBDDSCAT/portfolio-studio-demos/actions/workflows/scientific-tools.yml)
+
+Computational optics and experimental data tools, with reusable JavaScript
+modules, zero-runtime-dependency Node.js CLIs, and local browser instruments.
+
+**[Open the scientific tools](https://bdbddscat.github.io/portfolio-studio-demos/tools/)** ·
+[中文使用说明](tools/README.zh-CN.md) · [Source archives & release notes](https://github.com/BDBDDSCAT/portfolio-studio-demos/releases/tag/scientific-tools-v1.0.0)
+
+| Project | Problem it solves | Browser | Source & docs |
+| --- | --- | --- | --- |
+| **Wavebench** | Complex-field propagation, sampling diagnostics, model comparison, distance sweeps | [Open](https://bdbddscat.github.io/portfolio-studio-demos/wavebench/) | [wavebench/](wavebench/README.md) |
+| **Thinfilm** | Multilayer reflection, transmission and absorption; s/p wavelength and angle scans | [Open](https://bdbddscat.github.io/portfolio-studio-demos/thinfilm/) | [thinfilm/](thinfilm/README.md) |
+| **Tracefit** | Gaussian/Lorentzian peak fitting with baseline, residuals and local uncertainty | [Open](https://bdbddscat.github.io/portfolio-studio-demos/tracefit/) | [tracefit/](tracefit/README.md) |
+| **Runcheck** | Experimental CSV validation: composite keys, ranges, scan order and balance rules | [Open](https://bdbddscat.github.io/portfolio-studio-demos/runcheck/) | [runcheck/](runcheck/README.md) |
+
+Each project is independent: copy its directory, import its modules, or run its
+CLI using Node.js 22+. Optical and statistical conventions are documented beside
+the code. Examples are synthetic and are labeled as such. Numerical tests use
+analytic references and known inputs; browser tests exercise actual file imports,
+computations, and exports. Each tool has an MIT license.
+
+```sh
+git clone https://github.com/BDBDDSCAT/portfolio-studio-demos.git
+cd portfolio-studio-demos
+python3 -m http.server 8099 --bind 127.0.0.1
+```
+
+Open <http://127.0.0.1:8099/tools/>. No build or package installation is needed
+for the instruments. Run `npm test` inside a tool directory for numerical and CLI
+checks. Development dependencies are needed only for browser tests.
+See [the tool index](tools/README.md) for the workflow and individual READMEs
+for commands, API examples, export formats, and limitations.
+
+## Web & automation portfolio
 
 日本語のWebデザインと、小規模な自動化の自主制作ポートフォリオです。
 
@@ -15,7 +50,6 @@
 | [こつこつ観測所](https://bdbddscat.github.io/portfolio-studio-demos/demos/pixel.html) | ピクセルアート、ゲーム風UI | 集中・休憩タイマー、開始・一時停止、タスク保存と削除の取り消し |
 | [Order Desk](https://bdbddscat.github.io/portfolio-studio-demos/demos/minimal.html) | ミニマル、データ中心 | 検索、絞り込み、並び替え、確認後金額入力、CSV出力 |
 | [つくるメモ](https://bdbddscat.github.io/portfolio-studio-demos/demos/doodle.html) | 控えめな手描き、付箋、手順図 | 制作内容の選択、範囲の即時更新、依頼文コピー、テキスト保存 |
-| [Wavebench · 光の実験室](https://bdbddscat.github.io/portfolio-studio-demos/wavebench/) | 数値光学、技術コンソール | Fresnel・角スペクトル・Fraunhofer、複素光場、距離走査、サンプリング診断、CLI・CSV・JSON |
 
 ## 動かす
 

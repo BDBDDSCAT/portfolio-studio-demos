@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "columns": {
+    "sample": { "type": "string", "nullable": false, "enum": ["sample-a", "sample-b"] },
+    "wavelength_nm": { "type": "number", "nullable": false, "min": 380, "max": 750 },
+    "R": { "type": "number", "nullable": false, "min": 0, "max": 1 },
+    "T": { "type": "number", "nullable": false, "min": 0, "max": 1 },
+    "A": { "type": "number", "nullable": false, "min": 0, "max": 1 }
+  },
+  "requiredColumns": ["sample", "wavelength_nm", "R", "T", "A"],
+  "extraColumns": "reject",
+  "uniqueKeys": [["sample", "wavelength_nm"]],
+  "monotonic": [{ "column": "wavelength_nm", "groupBy": ["sample"], "strict": true }],
+  "sums": [{ "columns": ["R", "T", "A"], "target": 1, "tolerance": 0.000001 }]
+}

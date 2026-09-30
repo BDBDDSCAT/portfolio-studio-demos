@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#101419" />
+    <meta
+      name="description"
+      content="Thinfilm is an open-source thin-film optics instrument. Edit multilayer stacks, scan wavelength or angle, and export raw reflectance, transmittance, and absorption."
+    />
+    <title>Thinfilm — 薄膜光学工作台</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./src/style.css" />
+    <script type="module" src="./src/app.js"></script>
+  </head>
+  <body>
+    <a class="skip" href="#instrument" data-i18n="skip">跳到工作台</a>
+    <header class="header">
+      <a class="brand" href="./" aria-label="Thinfilm home"
+        ><svg viewBox="0 0 28 28" aria-hidden="true">
+          <path d="M3 7h22M3 14h22M3 21h22" />
+          <path class="brand-ray" d="m7 2 6 10-3 5 7 9" /></svg
+        >THINFILM<span>1.0 / SCATTERING MATRIX</span></a
+      >
+      <nav aria-label="Navigation">
+        <a href="../" data-i18n="portfolio">作品集</a
+        ><a
+          href="https://github.com/BDBDDSCAT/portfolio-studio-demos/tree/main/thinfilm"
+          >GitHub ↗</a
+        ><button id="language" type="button" aria-label="Switch to English">
+          EN
+        </button>
+      </nav>
+    </header>
+    <main>
+      <section class="intro">
+        <div>
+          <p class="kicker">NUMERICAL OPTICS / MULTILAYER INTERFERENCE</p>
+          <h1 data-i18n="heading">薄膜光学工作台</h1>
+          <p class="intro-copy" data-i18n="description">
+            从一个界面到多层干涉。编辑膜系，检查能量，导出可复现的数值结果。
+          </p>
+        </div>
+        <div class="runtime">
+          <span id="status-dot"></span
+          ><span
+            id="status"
+            role="status"
+            aria-live="polite"
+            data-i18n="initializing"
+            >正在初始化…</span
+          ><span id="elapsed">—</span>
+        </div>
+      </section>
+      <div class="instrument" id="instrument">
+        <aside class="stack-panel">
+          <section class="section">
+            <div class="section-title">
+              <h2>
+                <span>01</span
+                ><span data-i18n="stackTitle">膜系 / 从上到下</span>
+              </h2>
+              <span class="tag" data-i18n="coherent">相干模型</span>
+            </div>
+            <label for="preset" data-i18n="example">载入示例</label>
+            <select id="preset">
+              <option value="ar" data-i18n="presetAr">
+                λ/4 单层增透膜 · 550 nm
+              </option>
+              <option value="interface" data-i18n="presetInterface">
+                空气 / 玻璃单界面
+              </option>
+              <option value="bragg" data-i18n="presetBragg">
+                Bragg 反射镜 · 8 对膜层
+              </option>
+              <option value="absorber" data-i18n="presetAbsorber">
+                吸收薄膜 · k &gt; 0
+              </option>
+              <option value="custom" hidden data-i18n="presetCustom">
+                自定义膜系
+              </option>
+            </select>
+            <p class="help" id="preset-note"></p>
+            <div class="boundary-row">
+              <span class="medium-index">IN</span
+              ><label for="incident" data-i18n="incident">入射介质 n₀</label
+              ><input
+                id="incident"
+                type="number"
+                min="0.000001"
+                step="any"
+                value="1"
+              />
+            </div>
+            <div
+              class="stack-visual"
+              id="stack-visual"
+              role="img"
+              aria-label="Layer stack"
+            ></div>
+            <div class="table-wrap">
+              <table id="layer-table">
+                <caption class="sr-only" data-i18n="tableCaption">
+                  按入射光方向排列的薄膜层
+                </caption>
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">n</th>
+                    <th scope="col">k</th>
+                    <th scope="col">d / nm</th>
+                    <th scope="col">
+                      <span class="sr-only" data-i18n="remove">移除</span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div class="layer-actions">
+              <button id="add-layer" type="button" data-i18n="addLayer">
+                + 添加膜层</button
+              ><span id="layer-count"></span>
+            </div>
+            <div class="boundary-row substrate">
+              <span class="medium-index">OUT</span
+              ><label for="substrate" data-i18n="substrate">基底 nₛ</label
+              ><input
+                id="substrate"
+                type="number"
+                min="0.000001"
+                step="any"
+                value="1.5"
+              />
+            </div>
+            <p class="help" data-i18n="layerHelp">
+              n 为折射率，k ≥ 0 为消光系数；d
+              为物理厚度。入射介质与基底为半无限、无吸收介质。
+            </p>
+          </section>
+          <section class="section files-section">
+            <div class="section-title">
+              <h2>
+                <span>02</span><span data-i18n="filesTitle">可复现的膜系</span>
+              </h2>
+              <span class="tag">JSON</span>
+            </div>
+            <div class="file-actions">
+              <button id="export-stack" type="button" data-i18n="exportStack">
+                导出膜系</button
+              ><button id="import-stack" type="button" data-i18n="importStack">
+                导入膜系</button
+              ><input
+                id="import-file"
+                type="file"
+                accept=".json,application/json"
+                hidden
+              />
+            </div>
+            <p class="help" data-i18n="filesHelp">
+              所有计算都在本地浏览器中完成。JSON 保留介质参数和每一层的
+              n、k、d。
+            </p>
+          </section>
+        </aside>
+        <div class="results-panel">
+          <section class="scan-section">
+            <div class="section-title">
+              <h2>
+                <span>03</span><span data-i18n="scanTitle">参数扫描</span>
+              </h2>
+              <span class="tag" id="scan-tag">WAVELENGTH</span>
+            </div>
+            <div class="scan-fields">
+              <div class="field scan-mode-field">
+                <label for="scan-mode" data-i18n="scanMode">扫描变量</label
+                ><select id="scan-mode">
+                  <option value="wavelength" data-i18n="modeWavelength">
+                    波长 λ
+                  </option>
+                  <option value="angle" data-i18n="modeAngle">入射角 θ</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="start" id="start-label">起点 / nm</label
+                ><input
+                  id="start"
+                  type="number"
+                  min="0.000001"
+                  step="any"
+                  value="380"
+                />
+              </div>
+              <div class="field">
+                <label for="stop" id="stop-label">终点 / nm</label
+                ><input
+                  id="stop"
+                  type="number"
+                  min="0.000001"
+                  step="any"
+                  value="780"
+                />
+              </div>
+              <div class="field">
+                <label for="points" data-i18n="samples">采样点数</label
+                ><input
+                  id="points"
+                  type="number"
+                  min="1"
+                  max="2001"
+                  step="1"
+                  value="401"
+                />
+              </div>
+              <div class="field">
+                <label for="wavelength" data-i18n="wavelength"
+                  >参考波长 / nm</label
+                ><input
+                  id="wavelength"
+                  type="number"
+                  min="0.000001"
+                  step="any"
+                  value="550"
+                />
+              </div>
+              <div class="field">
+                <label for="angle" data-i18n="angle">参考入射角 / °</label
+                ><input
+                  id="angle"
+                  type="number"
+                  min="0"
+                  max="85"
+                  step="any"
+                  value="0"
+                />
+              </div>
+              <div class="field polarization-field">
+                <label for="polarization" data-i18n="polarization">偏振</label
+                ><select id="polarization">
+                  <option value="unpolarized" data-i18n="unpolarized">
+                    非偏振 · (s + p) / 2
+                  </option>
+                  <option value="s" data-i18n="sPolarization">
+                    s · 电场垂直入射面
+                  </option>
+                  <option value="p" data-i18n="pPolarization">
+                    p · 电场平行入射面
+                  </option>
+                </select>
+              </div>
+              <button id="compute" class="primary" type="button">
+                <span data-i18n="compute">计算扫描</span
+                ><span aria-hidden="true">↗</span>
+              </button>
+            </div>
+            <p class="scan-help help" id="scan-help"></p>
+          </section>
+          <section class="chart-section">
+            <div class="chart-heading">
+              <div>
+                <h2 data-i18n="response">功率响应</h2>
+                <p id="chart-subtitle"></p>
+              </div>
+              <span class="raw-label">RAW R / T / A</span>
+            </div>
+            <div class="legend" aria-label="Curve legend">
+              <span
+                ><i class="r"></i><b>R</b
+                ><span data-i18n="reflectance">反射率</span></span
+              ><span
+                ><i class="t"></i><b>T</b
+                ><span data-i18n="transmittance">透射率</span></span
+              ><span
+                ><i class="a"></i><b>A</b
+                ><span data-i18n="absorption">吸收率</span></span
+              >
+            </div>
+            <div class="chart-frame">
+              <canvas
+                id="chart"
+                tabindex="0"
+                aria-describedby="chart-description probe-state"
+                aria-label="Reflectance, transmittance, and absorption scan"
+              ></canvas>
+              <div id="chart-empty" hidden data-i18n="emptyChart">
+                输入有效参数后计算扫描。
+              </div>
+            </div>
+            <p class="sr-only" id="chart-description"></p>
+            <div class="probe" id="probe-state" role="status" aria-live="off">
+              <span id="probe-x">—</span
+              ><span class="probe-r">R <b id="probe-r">—</b></span
+              ><span class="probe-t">T <b id="probe-t">—</b></span
+              ><span class="probe-a">A <b id="probe-a">—</b></span>
+            </div>
+            <p class="chart-help" data-i18n="chartHelp">
+              移动指针查看采样点；聚焦图表后按 ← / →。显示功率比例 R / T / A。
+            </p>
+          </section>
+          <section class="summary-section">
+            <div class="section-title">
+              <h2>
+                <span>04</span><span data-i18n="referenceTitle">参考点</span>
+              </h2>
+              <span id="reference-label"></span>
+            </div>
+            <div class="stats">
+              <div class="stat r-stat">
+                <span data-i18n="reflectance">反射率</span
+                ><strong id="stat-r">—</strong><small>R</small>
+              </div>
+              <div class="stat t-stat">
+                <span data-i18n="transmittance">透射率</span
+                ><strong id="stat-t">—</strong><small>T</small>
+              </div>
+              <div class="stat a-stat">
+                <span data-i18n="absorption">吸收率</span
+                ><strong id="stat-a">—</strong><small>A = 1 − R − T</small>
+              </div>
+            </div>
+            <div class="scan-stats" id="scan-stats"></div>
+            <p class="diagnostic" id="diagnostic"></p>
+          </section>
+          <div class="export-bar">
+            <p data-i18n="exportHelp">
+              保留原始精度 · 每个采样点都有 λ、θ、R、T、A
+            </p>
+            <div>
+              <button
+                id="download-csv"
+                type="button"
+                disabled
+                data-i18n="downloadCsv"
+              >
+                ↓ 扫描 CSV</button
+              ><button
+                id="export-result"
+                type="button"
+                disabled
+                data-i18n="exportResult"
+              >
+                ↓ 完整结果 JSON
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <section class="model-notes">
+        <div>
+          <span class="note-index">MODEL</span>
+          <h2 data-i18n="modelTitle">明确模型边界</h2>
+        </div>
+        <p data-i18n="modelNote">
+          平面波、均匀各向同性膜层、完全相干的多层干涉。每层 n 与 k
+          在整个扫描区间内固定；不包含材料色散、粗糙度或非相干厚基底。非偏振结果为
+          s、p 功率响应的算术平均。
+        </p>
+        <p data-i18n="energyNote">
+          R、T 为入射功率的比例，T 包含介质与传播角的通量因子。A = 1 − R −
+          T。扫描网格离散，极值只对应已采样点。
+        </p>
+      </section>
+    </main>
+    <footer>
+      <span
+        >THINFILM <span class="footer-divider">/</span>
+        <span data-i18n="footer">薄膜干涉 · 数值可查</span></span
+      >
+      <div>
+        <a href="../wavebench/">Wavebench ↗</a
+        ><a
+          href="https://github.com/BDBDDSCAT/portfolio-studio-demos/tree/main/thinfilm"
+          data-i18n="source"
+          >源代码 / API / CLI ↗</a
+        >
+      </div>
+    </footer>
+    <noscript
+      ><p class="noscript">
+        This instrument requires JavaScript. All calculations run locally in
+        your browser.
+      </p></noscript
+    >
+  </body>
+</html>

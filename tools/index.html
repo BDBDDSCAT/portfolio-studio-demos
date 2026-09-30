@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0c1117" />
+    <meta name="description" content="Local computational optics and experimental data tools: wave propagation, multilayer coatings, spectral fitting, and CSV quality checks." />
+    <title>Scientific tools — J_photonics</title>
+    <link rel="icon" href="../wavebench/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header class="header shell">
+      <a class="wordmark" href="./">J_PHOTONICS <span>/ SCIENTIFIC TOOLS</span></a>
+      <nav aria-label="Main navigation">
+        <a href="https://github.com/BDBDDSCAT/portfolio-studio-demos">GitHub</a>
+        <button id="language" type="button">中文</button>
+      </nav>
+    </header>
+    <main class="shell">
+      <section class="intro">
+        <p class="eyebrow" data-en="COMPUTATIONAL OPTICS / EXPERIMENT DATA" data-zh="计算光学 / 实验数据">COMPUTATIONAL OPTICS / EXPERIMENT DATA</p>
+        <h1 data-en="Model a field. Fit a trace. Check a run." data-zh="计算光场。拟合光谱。检查实验。">Model a field. Fit a trace. Check a run.</h1>
+        <p class="description" data-en="Four independent tools for reproducible numerical work. Use the browser, import the JavaScript modules, or run the Node.js CLIs." data-zh="四个独立的数值工具。可以在浏览器中使用、导入 JavaScript 模块，或通过 Node.js CLI 运行可复现实验。">Four independent tools for reproducible numerical work. Use the browser, import the JavaScript modules, or run the Node.js CLIs.</p>
+        <div class="facts"><span data-en="LOCAL FILE PROCESSING" data-zh="文件本地处理">LOCAL FILE PROCESSING</span><span data-en="NO RUNTIME DEPENDENCIES" data-zh="无运行依赖">NO RUNTIME DEPENDENCIES</span><span>MIT</span></div>
+      </section>
+      <section class="grid" aria-label="Tools">
+        <article class="tool">
+          <div class="tool-top"><span class="number">01 / FORWARD MODEL</span><span class="version">2.0.0</span></div>
+          <h2><a href="../wavebench/">Wavebench <span aria-hidden="true">↗</span></a></h2>
+          <p data-en="Propagate a complex optical field. Compare Fresnel and angular-spectrum models, inspect phase and sampling, and export a distance sweep." data-zh="传播复数光场，比较菲涅耳与角谱模型，检查相位和采样，导出距离扫描。">Propagate a complex optical field. Compare Fresnel and angular-spectrum models, inspect phase and sampling, and export a distance sweep.</p>
+          <div class="outputs"><span data-en="Complex field" data-zh="复数光场">Complex field</span><span data-en="Sampling diagnostics" data-zh="采样诊断">Sampling diagnostics</span><span>x–z CSV</span></div>
+          <pre><code>node bin/wavebench.js simulate --preset gaussian --method angular-spectrum --distance 250 --waist 0.2 --out out</code></pre>
+          <div class="links"><a href="../wavebench/" data-en="Open instrument →" data-zh="打开工作台 →">Open instrument →</a><a href="https://github.com/BDBDDSCAT/portfolio-studio-demos/tree/main/wavebench" data-en="Source & docs" data-zh="源码与文档">Source & docs</a></div>
+        </article>
+        <article class="tool">
+          <div class="tool-top"><span class="number">02 / MULTILAYER OPTICS</span><span class="version">1.0.0</span></div>
+          <h2><a href="../thinfilm/">Thinfilm <span aria-hidden="true">↗</span></a></h2>
+          <p data-en="Calculate a coating's reflection, transmission, and absorption. Edit the layer stack and scan wavelength or incidence angle for s and p polarization." data-zh="计算薄膜的反射、透射和吸收，编辑膜层，扫描波长或入射角，比较 s/p 偏振。">Calculate a coating's reflection, transmission, and absorption. Edit the layer stack and scan wavelength or incidence angle for s and p polarization.</p>
+          <div class="outputs"><span>R / T / A</span><span data-en="Stable scattering" data-zh="稳定散射递推">Stable scattering</span><span data-en="Stack JSON" data-zh="膜层 JSON">Stack JSON</span></div>
+          <pre><code>node bin/thinfilm.js spectrum --stack examples/ar.json --start 400 --stop 800 --points 201 --out out</code></pre>
+          <div class="links"><a href="../thinfilm/" data-en="Open instrument →" data-zh="打开工作台 →">Open instrument →</a><a href="https://github.com/BDBDDSCAT/portfolio-studio-demos/tree/main/thinfilm" data-en="Source & docs" data-zh="源码与文档">Source & docs</a></div>
+        </article>
+        <article class="tool">
+          <div class="tool-top"><span class="number">03 / PARAMETER ESTIMATION</span><span class="version">1.0.0</span></div>
+          <h2><a href="../tracefit/">Tracefit <span aria-hidden="true">↗</span></a></h2>
+          <p data-en="Fit Gaussian or Lorentzian peaks with an affine baseline. Inspect residuals, convergence, and local parameter uncertainty; use a sigma column for weighted fitting." data-zh="拟合高斯或洛伦兹峰及线性基线，检查残差、收敛状态和局部参数误差，支持 sigma 列加权拟合。">Fit Gaussian or Lorentzian peaks with an affine baseline. Inspect residuals, convergence, and local parameter uncertainty; use a sigma column for weighted fitting.</p>
+          <div class="outputs"><span data-en="Peak parameters" data-zh="峰参数">Peak parameters</span><span data-en="Residuals" data-zh="残差">Residuals</span><span data-en="Fit JSON" data-zh="拟合 JSON">Fit JSON</span></div>
+          <pre><code>node bin/tracefit.js fit --input examples/gaussian.csv --x wavelength_nm --y intensity --model gaussian --peaks 1 --out out</code></pre>
+          <div class="links"><a href="../tracefit/" data-en="Open instrument →" data-zh="打开工作台 →">Open instrument →</a><a href="https://github.com/BDBDDSCAT/portfolio-studio-demos/tree/main/tracefit" data-en="Source & docs" data-zh="源码与文档">Source & docs</a></div>
+        </article>
+        <article class="tool">
+          <div class="tool-top"><span class="number">04 / DATA QUALITY</span><span class="version">1.0.0</span></div>
+          <h2><a href="../runcheck/">Runcheck <span aria-hidden="true">↗</span></a></h2>
+          <p data-en="Audit an experimental CSV against an explicit schema. Detect duplicate keys, invalid values, broken scan order, and balance violations; export a report with source hashes." data-zh="按明确的 schema 检查实验 CSV，发现重复键、非法数值、扫描顺序和守恒关系错误，导出带源文件哈希的报告。">Audit an experimental CSV against an explicit schema. Detect duplicate keys, invalid values, broken scan order, and balance violations; export a report with source hashes.</p>
+          <div class="outputs"><span data-en="Schema checks" data-zh="Schema 校验">Schema checks</span><span data-en="SHA256 provenance" data-zh="SHA256 溯源">SHA256 provenance</span><span>JSON / HTML</span></div>
+          <pre><code>node cli.js audit --input examples/clean.csv --schema examples/schema.json --out out</code></pre>
+          <div class="links"><a href="../runcheck/" data-en="Open instrument →" data-zh="打开工作台 →">Open instrument →</a><a href="https://github.com/BDBDDSCAT/portfolio-studio-demos/tree/main/runcheck" data-en="Source & docs" data-zh="源码与文档">Source & docs</a></div>
+        </article>
+      </section>
+      <section class="workflow">
+        <h2 data-en="A reproducible workflow" data-zh="可复现的工作流程">A reproducible workflow</h2>
+        <p data-en="Model the expected response, estimate parameters from a measured trace, and validate the run's data. Each tool preserves numerical values and exports its inputs or configuration alongside the result." data-zh="先计算预期响应，再从测量曲线估计参数，最后检查实验记录。每个工具都保留数值结果，并导出输入或配置。">Model the expected response, estimate parameters from a measured trace, and validate the run's data. Each tool preserves numerical values and exports its inputs or configuration alongside the result.</p>
+        <p data-en="Every tool includes synthetic examples, numerical tests, and documented limits. Optical models use idealized assumptions; fit uncertainties are local approximations. Check convergence and inspect the model before interpreting a result." data-zh="各工具附有合成示例、数值测试和适用范围说明。光学模型采用理想化假设，拟合误差是局部近似；解释结果前应检查收敛并确认模型。">Every tool includes synthetic examples, numerical tests, and documented limits. Optical models use idealized assumptions; fit uncertainties are local approximations. Check convergence and inspect the model before interpreting a result.</p>
+      </section>
+    </main>
+    <footer class="shell footer"><span>J_photonics / BDBDDSCAT</span><a href="../" data-en="Portfolio" data-zh="作品集">Portfolio</a><a href="https://github.com/BDBDDSCAT/portfolio-studio-demos" data-en="Code, tests & documentation" data-zh="代码、测试与文档">Code, tests & documentation</a></footer>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
