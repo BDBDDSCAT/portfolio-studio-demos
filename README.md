@@ -15,6 +15,7 @@
 | [こつこつ観測所](https://bdbddscat.github.io/portfolio-studio-demos/demos/pixel.html) | ピクセルアート、ゲーム風UI | 集中・休憩タイマー、開始・一時停止、タスク保存と削除の取り消し |
 | [Order Desk](https://bdbddscat.github.io/portfolio-studio-demos/demos/minimal.html) | ミニマル、データ中心 | 検索、絞り込み、並び替え、確認後金額入力、CSV出力 |
 | [つくるメモ](https://bdbddscat.github.io/portfolio-studio-demos/demos/doodle.html) | 控えめな手描き、付箋、手順図 | 制作内容の選択、範囲の即時更新、依頼文コピー、テキスト保存 |
+| [Wavebench · 光の実験室](https://bdbddscat.github.io/portfolio-studio-demos/wavebench/) | 余白、光の干渉、物理図表 | 7種類の開口、波長・焦距離調整、手描き、PNG/CSV・JSON書き出し、実験リンク共有 |
 
 ## 動かす
 
@@ -48,3 +49,11 @@ python3 -m http.server 8099 --bind 127.0.0.1
 ## 制作の相談
 
 [ココナラのプロフィール](https://coconala.com/users/5586100)から、入力資料・完成イメージ・希望納期を添えてご相談ください。
+
+## Wavebench · 光の実験室
+
+ブラウザで動くフーリエ光学の実験台です。単色・スカラーの夫琅禾費回折を計算し、開口、焦点面の像、中心の強度断面を表示します。実験はピーク強度で正規化され、有限の格子で近似しています。
+
+[デモ](https://bdbddscat.github.io/portfolio-studio-demos/wavebench/) · [ソースと使い方](wavebench/README.ja.md) · [English](wavebench/README.md) · [中文](wavebench/README.zh-CN.md)
+
+単独で動かす場合は `wavebench/` をHTTPサーバーで配信してください。数値・状態の検証はNode.js 22以降の `npm test`、ブラウザ検証はPlaywrightです。Wavebench部分は [MIT License](wavebench/LICENSE) で公開しています。
