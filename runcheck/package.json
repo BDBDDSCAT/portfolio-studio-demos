@@ -1,0 +1,37 @@
+{
+  "name": "runcheck",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local CSV quality checks for reproducible numerical experiments.",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "bin": {
+    "runcheck": "./cli.js"
+  },
+  "exports": {
+    ".": "./src/audit.js"
+  },
+  "files": [
+    "cli.js",
+    "src/audit.js",
+    "examples",
+    "docs/schema.md",
+    "README.md",
+    "README.zh-CN.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "cli": "node cli.js",
+    "serve": "python3 -m http.server 8099 --bind 127.0.0.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bdbddscat/portfolio-studio-demos.git",
+    "directory": "runcheck"
+  },
+  "keywords": ["csv", "data-validation", "scientific-computing", "reproducibility", "cli"]
+}

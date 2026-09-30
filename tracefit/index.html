@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Local Gaussian and Lorentzian peak fitting, residual analysis, and uncertainty diagnostics. No uploads. No runtime dependencies.">
+  <title>Tracefit — Peak fitting & residual analysis</title>
+  <link rel="stylesheet" href="src/style.css">
+<link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="./"><span class="brand-mark">∿</span> TRACEFIT <span class="version">v1.0</span></a><nav><a href="README.md" data-i18n="documentation">Documentation</a><a href="https://github.com/BDBDDSCAT/portfolio-studio-demos/tree/main/tracefit">GitHub ↗</a><button id="language-toggle" class="text-button" aria-label="Switch language">中文</button></nav></header>
+  <main>
+    <section class="intro"><p class="eyebrow" data-i18n="eyebrow">SIGNAL ANALYSIS / CONSTRAINED NONLINEAR FITTING</p><h1 data-i18n="title">Fit the signal.<br>Inspect what remains.</h1><p class="lede" data-i18n="lede">Gaussian and Lorentzian peaks with an affine baseline. Inspect residuals, convergence, and local parameter uncertainty in one place.</p><div class="capabilities"><span data-i18n="local">Local processing</span><span data-i18n="positive">1–3 positive peaks</span><span data-i18n="weighted">Optional σ weighting</span></div></section>
+    <div class="workspace">
+      <aside class="panel controls">
+        <div class="panel-heading"><span class="step">01</span><h2 data-i18n="input">Input trace</h2></div>
+        <label class="upload" for="csv-upload"><strong data-i18n="upload">Open CSV</strong><span data-i18n="uploadDetail">Named columns · comma separated</span><input id="csv-upload" type="file" accept=".csv,text/csv,text/plain"></label>
+        <p id="source-label" class="source-label"></p>
+        <p class="label" data-i18n="examples">SYNTHETIC EXAMPLES</p>
+        <div class="examples"><button id="sample-gaussian">Gaussian</button><button id="sample-doublet" data-i18n="doublet">Doublet</button><button id="sample-lorentzian">Lorentzian</button></div>
+        <div class="field-grid"><label><span data-i18n="xColumn">x column</span><select id="x-column"></select></label><label><span data-i18n="yColumn">y column</span><select id="y-column"></select></label></div>
+        <label><span data-i18n="sigmaColumn">Known y uncertainty σ</span><select id="sigma-column"></select></label>
+        <div class="divider"></div>
+        <div class="panel-heading"><span class="step">02</span><h2 data-i18n="modelHeading">Fit model</h2></div>
+        <div class="field-grid"><label><span data-i18n="model">Peak shape</span><select id="model"><option value="gaussian">Gaussian</option><option value="lorentzian">Lorentzian</option></select></label><label><span data-i18n="peaks">Peak count</span><select id="peak-count"><option>1</option><option>2</option><option>3</option></select></label></div>
+        <p id="model-note" class="subtle"></p>
+        <button id="fit-button" class="primary" data-i18n="run">Run fit <span>↗</span></button>
+        <div id="fit-status" class="status" role="status" aria-live="polite"></div>
+        <p class="privacy" data-i18n="privacy">Your CSV stays in this browser. Data is never sent to a server.</p>
+      </aside>
+      <section class="results">
+        <div class="metrics"><div><span data-i18n="samples">SAMPLES</span><strong id="metric-samples">—</strong></div><div><span>RMSE</span><strong id="metric-rmse">—</strong></div><div><span data-i18n="dof">DEGREES OF FREEDOM</span><strong id="metric-dof">—</strong></div><div><span data-i18n="uncertainty">LOCAL COVARIANCE</span><strong id="metric-covariance">—</strong></div></div>
+        <div class="panel plot-panel"><div class="plot-heading"><h2 data-i18n="signal">Observed & fitted</h2><div class="legend"><span class="observed" data-i18n="observed">Observed</span><span class="fitted" data-i18n="fitted">Fit</span></div></div><canvas id="fit-chart" role="img" aria-label="Observed and fitted signal"></canvas><p id="axis-description" class="axis-description"></p></div>
+        <div class="panel residual-panel"><div class="plot-heading"><h2 data-i18n="residuals">Residuals</h2><span class="subtle" data-i18n="residualDefinition">observed − fitted</span></div><canvas id="residual-chart" role="img" aria-label="Residuals versus x"></canvas></div>
+        <div class="panel parameters"><div class="plot-heading"><h2 data-i18n="parameters">Parameters & uncertainty</h2><div class="export-actions"><button id="export-csv" disabled>CSV ↓</button><button id="export-json" disabled>JSON ↓</button></div></div><div id="warning-list" class="warnings"></div><div class="table-scroll"><table id="parameter-table"><thead><tr><th data-i18n="parameter">Parameter</th><th data-i18n="estimate">Estimate</th><th data-i18n="standardError">Local standard error</th></tr></thead><tbody></tbody></table></div><p id="covariance-note" class="subtle"></p></div>
+      </section>
+    </div>
+    <footer><span data-i18n="footer">Convergence is a numerical status. Residuals and model assumptions still need inspection.</span><a href="docs/model.md" data-i18n="limitations">Model & statistical limits ↗</a></footer>
+  </main>
+  <script type="module" src="src/app.js"></script>
+</body></html>
