@@ -15,7 +15,7 @@
 | [こつこつ観測所](https://bdbddscat.github.io/portfolio-studio-demos/demos/pixel.html) | ピクセルアート、ゲーム風UI | 集中・休憩タイマー、開始・一時停止、タスク保存と削除の取り消し |
 | [Order Desk](https://bdbddscat.github.io/portfolio-studio-demos/demos/minimal.html) | ミニマル、データ中心 | 検索、絞り込み、並び替え、確認後金額入力、CSV出力 |
 | [つくるメモ](https://bdbddscat.github.io/portfolio-studio-demos/demos/doodle.html) | 控えめな手描き、付箋、手順図 | 制作内容の選択、範囲の即時更新、依頼文コピー、テキスト保存 |
-| [Wavebench · 光の実験室](https://bdbddscat.github.io/portfolio-studio-demos/wavebench/) | 余白、光の干渉、物理図表 | 7種類の開口、波長・焦距離調整、手描き、PNG/CSV・JSON書き出し、実験リンク共有 |
+| [Wavebench · 光の実験室](https://bdbddscat.github.io/portfolio-studio-demos/wavebench/) | 数値光学、技術コンソール | Fresnel・角スペクトル・Fraunhofer、複素光場、距離走査、サンプリング診断、CLI・CSV・JSON |
 
 ## 動かす
 
@@ -52,7 +52,7 @@ python3 -m http.server 8099 --bind 127.0.0.1
 
 ## Wavebench · 光の実験室
 
-ブラウザで動くフーリエ光学の実験台です。単色・スカラーの夫琅禾費回折を計算し、開口、焦点面の像、中心の強度断面を表示します。実験はピーク強度で正規化され、有限の格子で近似しています。
+JavaScriptのスカラー波動光学ライブラリ、Node.js CLI、ブラウザの数値実験コンソールです。Fresnel・角スペクトルの自由空間伝搬と、理想レンズ焦点面のFraunhofer場を計算します。複素振幅・位相・未正規化の相対強度を保持し、距離走査、モデル比較、サンプリング診断、ネイティブ格子のCSV出力を備えます。有限格子と周期境界の制約は、モデル文書に明記しています。
 
 [デモ](https://bdbddscat.github.io/portfolio-studio-demos/wavebench/) · [ソースと使い方](wavebench/README.ja.md) · [English](wavebench/README.md) · [中文](wavebench/README.zh-CN.md)
 

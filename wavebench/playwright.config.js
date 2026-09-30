@@ -1,8 +1,9 @@
 import { existsSync } from 'node:fs';
 import { defineConfig, devices } from '@playwright/test';
 
-const executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
-  || (existsSync('/usr/bin/chromium') ? '/usr/bin/chromium' : undefined);
+const executablePath =
+  process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH ||
+  (existsSync('/usr/bin/chromium') ? '/usr/bin/chromium' : undefined);
 
 export default defineConfig({
   testDir: './tests',
@@ -15,7 +16,7 @@ export default defineConfig({
   expect: { timeout: 10_000 },
   reporter: process.env.CI ? [['github'], ['list']] : 'list',
   use: {
-    baseURL: 'http://127.0.0.1:8080',
+    baseURL: 'http://127.0.0.1:8090',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     launchOptions: executablePath ? { executablePath } : {},
@@ -33,8 +34,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'python3 -m http.server 8080 --bind 127.0.0.1',
-    url: 'http://127.0.0.1:8080',
+    command: 'python3 -m http.server 8090 --bind 127.0.0.1',
+    url: 'http://127.0.0.1:8090',
     reuseExistingServer: !process.env.CI,
     timeout: 20_000,
   },

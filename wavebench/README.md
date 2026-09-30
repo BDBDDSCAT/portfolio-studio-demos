@@ -1,102 +1,122 @@
-# Wavebench · 光の実験室
+# Wavebench
 
-**[Open the live demo](https://bdbddscat.github.io/portfolio-studio-demos/wavebench/)** · [简体中文](README.zh-CN.md) · [日本語](README.ja.md)
+Scalar wave propagation in JavaScript, with a Node.js CLI and a browser instrument.
+Compare Fresnel and angular-spectrum propagation, inspect complex fields on a
+physical grid, and export a parameter study that another machine can reproduce.
+An ideal-lens Fraunhofer model is included for focal-plane diffraction.
 
-Draw a small opening. See where the light goes.
+```bash
+node bin/wavebench.js simulate --preset double --method angular-spectrum --distance 100 --wavelength 532 --grid 512 --out out
+node bin/wavebench.js scan --preset gaussian --waist 0.3 --method fresnel --start 10 --stop 500 --steps 21 --out scan
+```
 
-Wavebench is a browser diffraction sandbox: change a slit, ring, or phase mask and
-watch its Fourier-plane pattern respond. A quiet workbench for optics, generative
-shapes, and the moment an equation becomes something you can see.
+**[Browser instrument](https://bdbddscat.github.io/portfolio-studio-demos/wavebench/)** ·
+[Source](https://github.com/BDBDDSCAT/portfolio-studio-demos/tree/main/wavebench) ·
+[简体中文](README.zh-CN.md) · [日本語](README.ja.md)
 
-[![Wavebench: aperture, diffraction pattern, and intensity section](docs/preview.png)](https://bdbddscat.github.io/portfolio-studio-demos/wavebench/)
+[![Wavebench propagation instrument: source field, output field, sampling diagnostics, and distance scan](docs/preview.png)](https://bdbddscat.github.io/portfolio-studio-demos/wavebench/)
 
-HTML, CSS, and JavaScript. No build step, runtime dependencies, CDN, analytics, or
-API key. Computation and file exports stay in your browser.
+The CLI writes native-grid data and a manifest. The browser provides the same
+models with controls, phase views, distance scans, and local file import/export.
+No server backend, account, API key, CDN, or runtime package is required.
 
-## Try an experiment
+## Models and output grids
 
-1. Start with **Double slit**. Increase the slit separation: the fringes move
-   closer together.
-2. Switch to **Circular**. Make the aperture smaller: the central spot widens.
-3. Try **Vortex** and change the charge: a phase winding produces a dark center.
-4. Select **Draw your own**, draw an opening, and compare its shape with its
-   diffraction pattern.
+| Method             | Physical calculation                                      | Output sampling        |
+| ------------------ | --------------------------------------------------------- | ---------------------- |
+| `fraunhofer`       | Fourier field at the focal plane of an ideal lens         | `λ f / L`              |
+| `fresnel`          | Paraxial free-space propagation by a transfer function    | `L / N`, same as input |
+| `angular-spectrum` | Scalar free-space propagation by plane-wave decomposition | `L / N`, same as input |
 
-The aperture preview shows amplitude or phase. The diffraction view offers linear
-and logarithmic display, and the center section shows normalized intensity on a
-physical distance axis.
+Fresnel and angular spectrum describe the same free-space problem at different
+levels of approximation. The lens focal-plane model describes a different optical
+configuration. Focal length and propagation distance are separate parameters.
 
-## What is included
+The input window is 8 × 8 mm. Choose 256, 512, or 1024 samples per axis; the default
+is 512. Sources include single/double slits, a grating, circular and annular
+apertures, a vortex, a custom amplitude mask, and a Gaussian beam. Apertures can
+use plane or Gaussian illumination.
 
-| Experiment | What to change | What to watch |
-| --- | --- | --- |
-| Single slit | Slit width | Width of the central maximum and side lobes |
-| Double slit | Width and separation | The diffraction envelope and interference fringes |
-| Grating | Slit count and spacing | Narrow peaks from many openings |
-| Circular | Diameter | The Airy pattern |
-| Annular | Outer and inner diameters | Redistribution of the rings |
-| Vortex | Diameter and integer charge | A phase winding and central null |
-| Custom | Draw or erase the aperture | The Fourier pattern of your own mask |
+The browser starts with a 0.2 mm Gaussian waist, angular-spectrum propagation,
+and a 250 mm distance. A comparison calculation reports the relative L2
+difference between Fresnel and angular-spectrum complex fields and intensities
+for the same source and distance.
 
-- Wavelength, focal length, and aperture controls with physical units.
-- Aperture amplitude/phase preview, diffraction image, and central intensity section.
-- PNG export of both panels, the intensity section, and parameters; CSV export
-  for the intensity section.
-- Shareable links for the six parameter-based experiments.
-- JSON session export/import, including a custom drawn aperture.
+## Reuse the numerical engine
 
-[See an exported vortex experiment](docs/vortex.png): the PNG includes the mask,
-pattern, physical scale, parameters, and a linear intensity section.
+The engine is an ES module and does not depend on the DOM:
 
-Custom drawings are saved in JSON sessions; a share link does not include their
-pixel data. Clipboard copying requires HTTPS or localhost and browser permission.
+```js
+import { simulateExperiment } from './src/propagation.js';
 
-## Run locally
+const result = simulateExperiment(
+  {
+    preset: 'double',
+    method: 'angular-spectrum',
+    windowMm: 8,
+    wavelengthNm: 532,
+    distanceMm: 100,
+  },
+  512,
+);
+console.log({
+  pitchMm: result.outputPitchMm,
+  inputPower: result.inputPower,
+  outputPower: result.outputPower,
+});
+```
 
-Serve the repository with any static HTTP server. Python is one option:
+Use `propagateField({ real, imag }, options)` for an arbitrary complex input.
+See [the API and file reference](docs/reference.md) for an example, return values,
+coordinate conventions, CLI flags, and export schemas. The exported complex
+envelope has its uniform propagation carrier removed; phase is in radians. Raw
+intensity and peak-normalized intensity are separate quantities.
+
+## Reproducible experiments
+
+- **Single plane:** export the full native 2D grid and its central horizontal
+  section, including coordinates, raw relative irradiance, normalized intensity,
+  and phase. Screen zoom and color mapping do not change these values.
+- **Distance scan:** propagate the same source to each requested distance. The
+  default scan has 21 planes and produces an `x`–`z` central-section heatmap and
+  CSV data. The browser heatmap and its `global_normalized_intensity` column use
+  one peak across all central cuts, preserving relative peak changes between
+  planes. CLI scan CSV also provides per-plane `normalized_intensity`.
+- **Source import:** convert a local PNG/JPG/WebP into an amplitude mask, preserving
+  its aspect ratio with black padding. Image import is available in the browser.
+- **Experiment JSON:** save parameters, grid size, display settings, and a custom
+  mask when present. Parameter-based sources also have deterministic v2 share
+  links; v1 links restore the original Fraunhofer setup.
+- **Preview PNG:** export the visible instrument panels and parameters for a
+  report; export a result manifest for model, sampling, and diagnostics. Use CSV
+  for numerical analysis.
+
+A custom mask is shared through an experiment JSON file, rather than a URL.
+Fractional mask samples are stored at 8-bit amplitude precision. All browser file
+processing happens locally.
+
+## Run from source
+
+Use Node.js 22 or newer for the CLI and numerical tests:
 
 ```bash
 git clone https://github.com/BDBDDSCAT/portfolio-studio-demos.git
 cd portfolio-studio-demos/wavebench
-python3 -m http.server 8080 --bind 127.0.0.1
-```
-
-Open <http://127.0.0.1:8080>. No package installation is needed to use the app.
-Use an HTTP server rather than opening `index.html` as a `file://` URL, since the
-app uses JavaScript modules.
-
-## What the model means
-
-Wavebench calculates **scalar, monochromatic Fraunhofer diffraction** in the focal
-plane of an ideal lens. The complex aperture field is transformed with a 2D FFT;
-the squared magnitude gives intensity.
-
-The default grid is 512 × 512 over an 8 mm aperture window. Aperture sampling is
-`L / N`; observation-plane sampling is `λ f / L`. Increasing wavelength or focal
-length stretches the pattern's physical scale.
-
-The view starts at 4 mm across, with 2, 4, 8, and 16 mm options. It is resampled
-from the FFT output and limited to the available sampled range. The intensity
-section uses the same displayed distance range.
-
-Each result is normalized to its own peak. The image helps compare shape and
-relative intensity within an experiment; it does not compare absolute brightness
-between different apertures. The finite grid can underresolve fine features and
-sharp edges. Near-field propagation, polarization, lens aberrations, and material
-dispersion are outside this model.
-
-Equations, units, sampling limits, and analytical checks are in
-[docs/physics.md](docs/physics.md).
-
-## Development
-
-Node.js 22 or newer is used for the built-in numerical tests:
-
-```bash
+node bin/wavebench.js --help
 npm test
 ```
 
-The browser checks use Playwright as a development dependency:
+For the browser, serve this directory with any static HTTP server:
+
+```bash
+python3 -m http.server 8080 --bind 127.0.0.1
+```
+
+Open <http://127.0.0.1:8080>. A build or package installation is unnecessary for
+normal use. JavaScript modules require HTTP; opening `index.html` directly as a
+local file is insufficient.
+
+Browser checks use development dependencies only:
 
 ```bash
 npm ci
@@ -104,10 +124,24 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the contribution workflow. Reports of
-incorrect units, numerical behavior, keyboard access, or confusing controls are
-especially useful.
+## Numerical validation and limits
 
-## License
+The numerical tests check FFT conventions and inversion, Parseval energy,
+single-slit and double-slit profiles, the Airy first zero, and vortex cancellation.
+The propagation checks cover identity, plane-wave phase, power conservation,
+Gaussian-beam evolution, and the paraxial agreement of Fresnel and angular spectrum.
+For the tested Gaussian case, beam width and peak irradiance use a `10⁻⁷` relative
+tolerance; the paraxial model comparison requires a relative complex-field RMS
+difference below `5×10⁻⁶`. CLI checks also integrate full-grid CSV values and
+verify the scan's Gaussian width. [The physics notes](docs/physics.md) state the
+grids, equations, and limits of this evidence.
 
-[MIT](LICENSE) · BDBDDSCAT
+This is a computational optics tool for learning, prototyping, and reproducible
+parameter studies. It is not a validated optical design suite or a vector Maxwell
+solver. Finite grids, periodic FFT boundaries, aperture rasterization, and sampled
+transfer functions constrain the result. Sampling and boundary diagnostics are
+heuristic warnings; passing them does not establish convergence. Check a larger
+window or finer grid before interpreting small features quantitatively.
+
+Contributions and reproducible numerical reports are welcome; see
+[CONTRIBUTING.md](CONTRIBUTING.md). [MIT License](LICENSE).
