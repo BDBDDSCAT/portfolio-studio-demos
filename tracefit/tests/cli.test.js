@@ -30,6 +30,28 @@ test('CLI known-sigma fit is self-contained and fitted CSV residuals match the r
   });
 });
 
+test('CLI exports finite tiny-unit fit parameters while retaining unavailable covariance', (t) => {
+  const base = directory(t), path = join(base, 'tiny-units.csv'), out = join(base, 'out');
+  const rows = Array.from({ length: 81 }, (_, i) => {
+    const x = (i - 40) / 10;
+    return `${x * 1e-310},${Math.exp(-0.5 * x * x) + 0.001 * x}`;
+  });
+  writeFileSync(path, `x,y\n${rows.join('\n')}\n`);
+  const result = run(['fit', '--input', path, '--out', out]);
+  assert.equal(result.status, 0, result.stderr);
+  const report = JSON.parse(readFileSync(join(out, 'fit.json'), 'utf8'));
+  assert.equal(report.converged, true);
+  assert.ok(Number.isFinite(report.parameters.slope));
+  assert.ok(Math.abs(report.parameters.slope * 1e-310 - 0.001) < 1e-8);
+  assert.equal(report.covariance.valid, false);
+  assert.equal(report.covariance.reason, 'numerical-range');
+  assert.ok(report.parameterTable.every(parameter => parameter.standardError === null));
+  assert.ok(report.warnings.some(warning => warning.code === 'NUMERICAL_RANGE'));
+  const lines = readFileSync(join(out, 'fitted.csv'), 'utf8').trim().split('\n').slice(1);
+  assert.equal(lines.length, 81);
+  assert.ok(lines.every(line => line.split(',').filter(value => value !== '').map(Number).every(Number.isFinite)));
+});
+
 test('unconverged CLI fit exits 3 and retains diagnostic output with invalid uncertainty', (t) => {
   const out = directory(t), result = run([...input, '--iterations', '1', '--starts', '1', '--out', out]);
   assert.equal(result.status, 3, result.stderr);

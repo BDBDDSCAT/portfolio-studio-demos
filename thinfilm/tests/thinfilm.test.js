@@ -267,6 +267,23 @@ test("scan endpoints, single point, CSV and examples are reproducible", async ()
   }
 });
 
+test("large finite wavelength intervals keep every scan coordinate finite and in range", () => {
+  for (const points of [5, 2001]) {
+    const scan = wavelengthScan(interfaceStack, { startNm: 8e307, stopNm: 1.6e308, points });
+    assert.equal(scan.rows[0].wavelengthNm, 8e307);
+    assert.equal(scan.rows.at(-1).wavelengthNm, 1.6e308);
+    scan.rows.forEach((row, i) => {
+      assert.ok(Number.isFinite(row.wavelengthNm));
+      assert.ok(row.wavelengthNm >= 8e307 && row.wavelengthNm <= 1.6e308);
+      close(row.wavelengthNm / 1e308, 0.8 + 0.8 * i / (points - 1), 1e-15);
+      close(row.R, 0.04);
+      close(row.T, 0.96);
+      if (i) assert.ok(row.wavelengthNm > scan.rows[i - 1].wavelengthNm);
+    });
+  }
+  assert.equal(wavelengthScan(interfaceStack, { startNm: 8e307, stopNm: 1.6e308, points: 1 }).rows[0].wavelengthNm, 8e307);
+});
+
 test("strict validation rejects unknown fields, invalid domains and unsupported sizes without mutating input", () => {
   const copy = structuredClone(interfaceStack);
   solveStack(interfaceStack);

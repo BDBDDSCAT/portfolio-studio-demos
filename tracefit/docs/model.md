@@ -36,7 +36,9 @@ The local approximation assumes the model is correct, errors are independent, an
 
 Standard errors are `null`, and covariance is explicitly invalid, when optimization does not converge, parameters touch a constraint, or the information matrix is singular or poorly conditioned. A `VALID` covariance flag means the numerical local checks passed; it is not validation of the measurement model. Exact noiseless data may yield zero residual-scaled errors; that reflects the supplied data, not a claim about real instrument accuracy.
 
-Extremely small or large supplied units can exceed floating-point range. Unrepresentable covariance also invalidates standard errors with a `NUMERICAL_RANGE` diagnostic. An overflowing RSS or weighted RSS is reported as `null` with a warning rather than infinity; RMSE uses a stable calculation. If fitted parameters or predictions cannot be represented, fitting throws an error asking for rescaled units.
+Extremely small or large supplied units can exceed floating-point range. Slope conversion preserves the ordinary arithmetic order and switches to a safer multiplication order or logarithmic scaling when an intermediate scale ratio overflows or underflows. A representable slope remains available even when its covariance is outside the numerical range. Unrepresentable covariance invalidates standard errors with a `NUMERICAL_RANGE` diagnostic. An overflowing RSS or weighted RSS is reported as `null` with a warning rather than infinity; RMSE uses a stable calculation. If fitted parameters or predictions cannot be represented, fitting throws an error asking for rescaled units.
+
+Lorentzian predictions use a reciprocal-distance form when the squared normalized distance overflows. Multiplying the amplitude before the second reciprocal retains representable far-tail values even when the standalone peak shape would underflow. Finite coordinates whose subtraction overflows are scaled before computing that reciprocal. Ordinary-range evaluations retain the direct model formula.
 
 ## CSV and provenance
 

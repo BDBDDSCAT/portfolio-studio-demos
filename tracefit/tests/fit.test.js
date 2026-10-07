@@ -93,6 +93,89 @@ test('normalization handles offset x units, small y units and changing baseline 
   });
 });
 
+test('tiny x units retain a finite slope and explicit covariance range warnings', () => {
+  for (const slope of [-0.001, 0, 0.001]) {
+    const input = Array.from({ length: 81 }, (_, i) => {
+      const x = (i - 40) / 10;
+      return { x: x * 1e-310, y: Math.exp(-0.5 * x * x) + slope * x };
+    });
+    const result = fitTrace(input);
+    assert.equal(result.converged, true);
+    assert.ok(Number.isFinite(result.parameters.slope));
+    close(result.parameters.slope * 1e-310, slope, 1e-8);
+    close(result.parameters.peaks[0].width / 1e-310, 1, 1e-7);
+    assert.ok(result.statistics.rmse < 1e-8);
+    assert.equal(result.covariance.valid, false);
+    assert.equal(result.covariance.reason, 'numerical-range');
+    assert.ok(result.warnings.some(warning => warning.code === 'NUMERICAL_RANGE'));
+    assert.ok(result.parameterTable.every(parameter => parameter.standardError === null));
+    assert.deepEqual(JSON.parse(JSON.stringify(result)), result);
+  }
+});
+
+test('slope conversion retains ordinary-order precision when numerator multiplication underflows', () => {
+  const input = Array.from({ length: 81 }, (_, i) => {
+    const x = (i - 40) / 10;
+    return { x: x * 1e-200, y: Math.exp(-0.5 * x * x) * 1e-310 };
+  });
+  const result = fitTrace(input);
+  assert.equal(result.converged, true);
+  assert.ok(Number.isFinite(result.parameters.slope));
+  // An exact power-of-two change of y units preserves the same normalized
+  // observations while keeping the reference fit's intermediate products normal.
+  const factor = 2 ** 1000;
+  const reference = fitTrace(input.map(({ x, y }) => ({ x, y: y * factor })));
+  assert.equal(reference.converged, true);
+  assert.notEqual(reference.parameters.slope, 0);
+  close(result.parameters.slope / (reference.parameters.slope / factor), 1, 1e-12);
+  assert.equal(result.covariance.reason, 'numerical-range');
+});
+
+test('subnormal slope scale ratios preserve representable signed slopes', () => {
+  for (const [xScale, yScale] of [[1, 1e-310], [1e200, 1e-110]]) {
+    for (const slope of [-0.001, 0.001]) {
+      const input = Array.from({ length: 81 }, (_, i) => {
+        const x = (i - 40) / 10;
+        return { x: x * xScale, y: (Math.exp(-0.5 * x * x) + slope * x) * yScale };
+      });
+      const result = fitTrace(input);
+      assert.equal(result.converged, true);
+      assert.ok(Number.isFinite(result.parameters.slope) && result.parameters.slope !== 0);
+      close((result.parameters.slope * xScale) / yScale, slope, 1e-8);
+      assert.equal(result.covariance.reason, 'numerical-range');
+    }
+  }
+});
+
+test('genuinely overflowing physical slopes are still rejected', () => {
+  const input = Array.from({ length: 81 }, (_, i) => {
+    const x = (i - 40) / 10;
+    return { x: x * 1e-310, y: Math.exp(-0.5 * x * x) + 0.1 * x };
+  });
+  assert.throws(() => fitTrace(input), /parameter units exceed the floating-point range/);
+});
+
+test('Lorentzian evaluation retains representable far tails without changing ordinary evaluations', () => {
+  const parameters = peak => ({ offset: 0, slope: 0, xReference: 0, peaks: [peak] });
+  for (const [x, peak, expected] of [
+    [1e200, { amplitude: 1e100, center: 0, width: 1 }, 1e-300],
+    [-1e200, { amplitude: 1e100, center: 0, width: 1 }, 1e-300],
+    [1e100, { amplitude: 1e300, center: 0, width: 1e-200 }, 1e-300],
+    [1e308, { amplitude: 1e308, center: -1e308, width: 1 }, 2.5e-309],
+    [1e308, { amplitude: 1e308, center: -1e308, width: 1e308 }, 2e307],
+  ]) {
+    const actual = evaluateTrace(x, parameters(peak), 'lorentzian');
+    assert.ok(actual > 0 && Number.isFinite(actual));
+    close(actual / expected, 1, 1e-12);
+  }
+  assert.equal(evaluateTrace(1e200, parameters({ amplitude: 0, center: 0, width: 1 }), 'lorentzian'), 0);
+  const peak = { amplitude: 4, center: 0.7, width: 0.55 };
+  for (const x of [-10, -1, 0, 0.7, 1, 10]) {
+    const expected = 4 * 0.55 ** 2 / (0.55 ** 2 + (x - 0.7) ** 2);
+    close(evaluateTrace(x, parameters(peak), 'lorentzian'), expected, 1e-14);
+  }
+});
+
 function normalRandom(seed = 794) {
   let state = seed;
   const uniform = () => {

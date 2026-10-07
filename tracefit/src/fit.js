@@ -7,13 +7,38 @@
 
 const MODELS = new Set(['gaussian', 'lorentzian']);
 
+function lorentzianPeak(x, { amplitude, center, width }) {
+  const distance = x - center;
+  const t = distance / width;
+  const squared = t * t;
+  if (Number.isFinite(squared)) return amplitude * (1 / (1 + squared));
+  // Keep the amplitude in the product before squaring a tiny reciprocal.
+  // Scaled coordinates also avoid overflow in the subtraction of finite x values.
+  const scale = Math.max(Math.abs(x), Math.abs(center));
+  const reciprocal = Number.isFinite(distance)
+    ? width / distance
+    : (width / scale) / (x / scale - center / scale);
+  return (amplitude * reciprocal) * reciprocal / (1 + reciprocal * reciprocal);
+}
+
+function restoreSlope(value, yScale, span) {
+  if (value === 0) return value;
+  const ratio = yScale / span;
+  if (Number.isFinite(ratio) && ratio >= 2 ** -1022) return ratio * value;
+  // Preserve the usual order when safe; multiplying first can underflow even
+  // though the physical slope is representable after division by the x span.
+  const product = yScale * value;
+  if (Number.isFinite(product) && Math.abs(product) >= 2 ** -1022) return product / span;
+  return Math.sign(value) * Math.exp(Math.log(Math.abs(value)) + Math.log(yScale) - Math.log(span));
+}
+
 export function evaluateTrace(x, parameters, model = 'gaussian') {
   if (!MODELS.has(model)) throw new RangeError('model must be gaussian or lorentzian');
   if (Array.isArray(x)) return x.map(value => evaluateTrace(value, parameters, model));
   let result = parameters.offset + parameters.slope * (x - parameters.xReference);
   for (const peak of parameters.peaks) {
     const t = (x - peak.center) / peak.width;
-    result += peak.amplitude * (model === 'gaussian' ? Math.exp(-0.5 * t * t) : 1 / (1 + t * t));
+    result += model === 'gaussian' ? peak.amplitude * Math.exp(-0.5 * t * t) : lorentzianPeak(x, peak);
   }
   return result;
 }
@@ -100,7 +125,7 @@ export function fitTrace(data, options = {}) {
   const p = permutation.map(index => best.p[index]);
   const parameters = {
     offset: yReference + yScale * p[0],
-    slope: yScale / span * p[1],
+    slope: restoreSlope(p[1], yScale, span),
     xReference,
     peaks: Array.from({ length: count }, (_, i) => ({
       amplitude: yScale * p[2 + i * 3],

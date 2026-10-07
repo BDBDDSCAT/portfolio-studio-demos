@@ -64,7 +64,7 @@ The incident angle is restricted to 0–85°, keeping the incident normal flux a
 
 A finite internal layer at `q ≈ 0` has coincident forward/backward traveling waves. The implemented scattering-wave decomposition is degenerate there. Such a stack is **explicitly rejected**, not regularized with an arbitrary index loss or returned with NaN. Shift the angle slightly, or use a solver with an analytic zero-`q` layer limit. A zero-thickness layer is removed before this check, since it is physically absent. Squared longitudinal values within 32 machine epsilons of cancellation use the critical limit; internal values within `10⁻¹²` of the index scale are rejected.
 
-The API accepts at most 128 layers and 1–2001 inclusive scan points. One point samples the start coordinate. Unknown fields, nonfinite values, active layers (`κ < 0`), complex boundary indices, and reversed scan ranges are rejected. Boundary indices must be represented as real numbers. Extreme index/phase values outside double-precision representability also fail explicitly.
+The API accepts at most 128 layers and 1–2001 inclusive scan points. One point samples the start coordinate. Scan endpoints are exact; if multiplying a finite range by the sample index would overflow, interpolation uses the fractional position before multiplication. This keeps every coordinate within finite supplied wavelength endpoints. Unknown fields, nonfinite values, active layers (`κ < 0`), complex boundary indices, and reversed scan ranges are rejected. Boundary indices must be represented as real numbers. Extreme index/phase values outside double-precision representability also fail explicitly.
 
 ## Analytic references in the test suite
 
