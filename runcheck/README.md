@@ -90,7 +90,7 @@ node cli.js audit --input scan.tsv --schema scan.schema.json --out reports/scan 
 - `extraColumns` defaults to `reject`; `allow` permits undeclared headers without applying column rules or profiles to them.
 - Each `uniqueKeys` entry is a tuple of columns. Numeric key values use their parsed value, so `1` and `1.0` are the same key. Incomplete, null, or malformed tuples are skipped. Tuple boundaries remain distinct even when string fields contain separators.
 - `monotonic` checks the original row order within each `groupBy` tuple. Omit `groupBy` to check the entire file. `strict: true` requires increasing values; the default `false` permits equality. Invalid or empty values do not reset the previous valid value. The audit never sorts rows.
-- `sums` checks `abs(sum - target) <= tolerance` using explicit finite `target` and nonnegative finite absolute `tolerance`. Rows with missing, null, or malformed members skip this cross-column rule; their individual violations still count.
+- `sums` checks `abs(sum - target) <= tolerance` using explicit finite `target` and nonnegative finite absolute `tolerance`. Compensated summation includes the target to retain small residuals when large signed values cancel. Rows with missing, null, or malformed members skip this cross-column rule; their individual violations still count.
 
 Unknown schema properties are rejected so misspelled rules cannot silently disappear. See the [full schema and CSV reference](docs/schema.md) for parsing, defaults, issue codes, and report semantics.
 

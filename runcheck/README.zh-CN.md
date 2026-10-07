@@ -93,7 +93,7 @@ node cli.js audit --input scan.tsv --schema scan.schema.json --out reports/scan 
 - `extraColumns` 默认 `reject`，多出的表头产生问题；设为 `allow` 时允许额外列，但不会为其执行列规则或生成统计。
 - `uniqueKeys` 中每个数组定义一组组合键。键按解析后的值比较，数值 `1` 与 `1.0` 等价。缺失、空值或类型错误的组合键跳过检查。字符串中的分隔符不会混淆元组边界。
 - `monotonic` 按输入原始顺序检查每组数值。`groupBy` 定义分组键，省略时检查整个文件；`strict: true` 要求严格递增，默认 `false` 允许相等。空值或类型错误不重置上一条有效数值。检查不会给数据排序。
-- `sums` 要求 `abs(sum - target) <= tolerance`。必须显式给出有限的 `target` 和非负有限的绝对 `tolerance`。成员缺失、为空或类型错误时跳过这一条跨列规则，单列问题仍计入总数。
+- `sums` 要求 `abs(sum - target) <= tolerance`。必须显式给出有限的 `target` 和非负有限的绝对 `tolerance`。补偿求和同时纳入目标值，保留大数正负抵消时的小残差。成员缺失、为空或类型错误时跳过这一条跨列规则，单列问题仍计入总数。
 
 数组中的列引用必须已在 `columns` 声明，并且不能重复。规则详解和完整英文参考见 [docs/schema.md](docs/schema.md)。
 

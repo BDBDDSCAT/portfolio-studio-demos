@@ -35,6 +35,20 @@ function delimiterOption(value = ',') {
   return value;
 }
 
+function compensatedSum(values) {
+  let total = 0, correction = 0;
+  for (const value of values) {
+    const next = total + value;
+    // Keep overflow an explicit violation instead of contaminating the correction.
+    if (!Number.isFinite(next)) return next;
+    correction += Math.abs(total) >= Math.abs(value)
+      ? (total - next) + value
+      : (value - next) + total;
+    total = next;
+  }
+  return total + correction;
+}
+
 /** RFC-style quoting, with literal embedded CR/LF preserved inside fields. */
 export function parseCSV(text, { delimiter = ',' } = {}) {
   if (typeof text !== 'string') throw new TypeError('CSV input must be text.');
@@ -252,9 +266,12 @@ export function auditCSV(text, schema, { delimiter = ',', maxIssues = 100 } = {}
     for (const rule of specification.sums) {
       const values = rule.columns.map((name) => typed.get(name));
       if (values.some((value) => typeof value !== 'number')) continue;
-      const sum = values.reduce((total, value) => total + value, 0);
-      if (!Number.isFinite(sum) || Math.abs(sum - rule.target) > rule.tolerance) {
-        add(row, rule.columns.join(' + '), 'sum', `Sum ${sum} differs from target ${rule.target}; absolute tolerance is ${rule.tolerance}.`);
+      // Include the target before rounding the final total, so a small residual
+      // survives both cancellation between columns and subtraction of a large target.
+      const residual = compensatedSum([...values, -rule.target]);
+      if (!Number.isFinite(residual) || Math.abs(residual) > rule.tolerance) {
+        const sum = compensatedSum(values);
+        add(row, rule.columns.join(' + '), 'sum', `Sum ${sum} differs from target ${rule.target}; residual is ${residual}; absolute tolerance is ${rule.tolerance}.`);
       }
     }
   }
