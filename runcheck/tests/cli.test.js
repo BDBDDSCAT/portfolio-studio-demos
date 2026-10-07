@@ -81,6 +81,26 @@ test('broken data exits 1 and keeps exact totals when saved issue examples are c
   assert.deepEqual(noneReport.counts, complete.counts);
 });
 
+test('cancellation in a sum rule fails the CLI audit and retains its residual in both reports', async t => {
+  const directory = await workspace(t);
+  const input = path.join(directory, 'cancellation.csv');
+  const schema = path.join(directory, 'schema.json');
+  const out = path.join(directory, 'reports');
+  await Promise.all([
+    writeFile(input, 'a,b,c\n10000000000000000,1,-10000000000000000\n'),
+    writeFile(schema, JSON.stringify({ version: 1, columns: { a: { type: 'number' }, b: { type: 'number' }, c: { type: 'number' } }, sums: [{ columns: ['a', 'b', 'c'], target: 0, tolerance: 0.5 }] })),
+  ]);
+  const result = invoke(...auditArgs(out, input, schema));
+  assert.equal(result.status, 1, result.stderr);
+  assert.match(result.stdout, /FAIL.*1 records.*1 issues.*1 invalid records/);
+  const report = await reportAt(out);
+  assert.equal(report.passed, false);
+  assert.deepEqual(report.issueCounts, { sum: 1 });
+  assert.equal(report.hashes.inputSha256, hash(await readFile(input)));
+  assert.match(report.issues[0].message, /Sum 1 differs from target 0; residual is 1;/);
+  assert.match(await readFile(path.join(out, 'report.html'), 'utf8'), /residual is 1;/);
+});
+
 test('tab and semicolon options parse quoted fields using the selected delimiter', async t => {
   const directory = await workspace(t);
   const schema = path.join(directory, 'schema.json');

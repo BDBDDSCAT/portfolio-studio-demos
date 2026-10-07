@@ -133,6 +133,23 @@ test("angle CLI and stdout CSV agree with API including unpolarized powers", asy
   }
 });
 
+test("CLI preserves finite large wavelength coordinates in JSON and raw CSV", async t => {
+  const directory = await mkdtemp(join(tmpdir(), "thinfilm-large-scan-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const result = run(["spectrum", "--stack", "examples/interface.json", "--start", "8e307", "--stop", "1.6e308", "--points", "5", "--out", directory]);
+  assert.equal(result.status, 0, result.stderr);
+  const report = JSON.parse(await readFile(join(directory, "result.json"), "utf8"));
+  const rows = (await readFile(join(directory, "curve.csv"), "utf8")).trim().split("\n").slice(1).map(line => line.split(",").map(Number));
+  assert.equal(rows.length, 5);
+  rows.forEach((row, i) => {
+    assert.ok(row.every(Number.isFinite));
+    assert.ok(Math.abs(row[0] / 1e308 - (0.8 + 0.2 * i)) < 1e-15);
+    assert.equal(row[0], report.scan.rows[i].wavelengthNm);
+  });
+  assert.equal(rows[0][0], 8e307);
+  assert.equal(rows.at(-1)[0], 1.6e308);
+});
+
 test("even force never overwrites the input stack or writes partial output for a known overlap", async () => {
   const directory = await mkdtemp(join(tmpdir(), "thinfilm-overlap-"));
   try {

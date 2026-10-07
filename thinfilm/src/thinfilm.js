@@ -270,7 +270,10 @@ function scanPoints(points) {
 function coordinate(start, stop, i, points) {
   if (points === 1) return start;
   // Exact endpoints, even when the range does not divide evenly.
-  return i === points - 1 ? stop : start + ((stop - start) * i) / (points - 1);
+  if (i === points - 1) return stop;
+  const range = stop - start;
+  const offset = range * i;
+  return start + (Number.isFinite(offset) ? offset / (points - 1) : range * (i / (points - 1)));
 }
 
 /** Inclusive wavelength scan. One point samples startNm. */

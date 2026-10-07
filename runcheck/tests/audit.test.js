@@ -123,6 +123,37 @@ test('sum rules use explicit absolute tolerance and skip incomplete invalid memb
   assert.equal(report.issues.find((i) => i.code === 'sum').startLine, 4);
 });
 
+test('sum rules retain small signed residuals regardless of cancellation order', () => {
+  const columns = { a: { type: 'number' }, b: { type: 'number' }, c: { type: 'number' } };
+  const text = 'a,b,c\n10000000000000000,1,-10000000000000000\n';
+  for (const keys of [['a', 'b', 'c'], ['a', 'c', 'b'], ['b', 'a', 'c'], ['b', 'c', 'a'], ['c', 'a', 'b'], ['c', 'b', 'a']]) {
+    const schema = { version: 1, columns, sums: [{ columns: keys, target: 0, tolerance: 0.5 }] };
+    const report = auditCSV(text, schema);
+    assert.equal(report.passed, false, keys.join(' + '));
+    assert.deepEqual(report.issueCounts, { sum: 1 });
+    assert.equal(report.issues[0].record, 1);
+    assert.match(report.issues[0].message, /residual is 1;/);
+    assert.equal(auditCSV(text, { ...schema, sums: [{ columns: keys, target: 1, tolerance: 0 }] }).passed, true);
+  }
+});
+
+test('sum tolerance compares the residual before rounding a large total', () => {
+  const columns = { a: { type: 'number' }, b: { type: 'number' } };
+  const schema = { version: 1, columns, sums: [{ columns: ['a', 'b'], target: 1e16, tolerance: 0.5 }] };
+  const report = auditCSV('a,b\n10000000000000000,1\n10000000000000000,-1\n10000000000000000,0.5\n10000000000000000,-0.5\n', schema);
+  assert.equal(report.counts.invalidRecords, 2);
+  assert.deepEqual(report.issues.map(issue => issue.record), [1, 2]);
+  assert.match(report.issues[0].message, /residual is 1;/);
+  assert.match(report.issues[1].message, /residual is -1;/);
+});
+
+test('nonrepresentable sum residuals remain violations even at the largest finite tolerance', () => {
+  const schema = { version: 1, columns: { a: { type: 'number' }, b: { type: 'number' } }, sums: [{ columns: ['a', 'b'], target: 0, tolerance: Number.MAX_VALUE }] };
+  const report = auditCSV('a,b\n1e308,1e308\n-1e308,-1e308\n', schema);
+  assert.equal(report.passed, false);
+  assert.deepEqual(report.issueCounts, { sum: 2 });
+});
+
 test('Welford profiles report known sample standard deviation and explicit undefined statistics', () => {
   const report = auditCSV('x,note\n2,a\n4,b\n4,c\n4,d\n5,e\n5,f\n7,g\n9,h\n,empty\nbad,text', { version: 1, columns: { x: { type: 'number', nullable: true }, note: { type: 'string' } } });
   const profile = report.profiles[0];

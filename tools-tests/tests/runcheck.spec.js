@@ -99,6 +99,25 @@ test('Runcheck hides stale reports after edits and rejects schema and CSV syntax
   await expect(page.locator('#profiles-table tbody tr')).toHaveCount(5);
 });
 
+test('Runcheck exposes cancellation residuals and respects inclusive sum tolerance', async ({ page }) => {
+  await open(page);
+  const schema = { version: 1, columns: { a: { type: 'number' }, b: { type: 'number' }, c: { type: 'number' } }, sums: [{ columns: ['a', 'b', 'c'], target: 0, tolerance: 0.5 }] };
+  await page.locator('#schema-input').fill(JSON.stringify(schema));
+  await page.locator('#csv-input').fill('a,b,c\n10000000000000000,1,-10000000000000000\n');
+  await page.locator('#audit-button').click();
+  await done(page, false);
+  await expect(page.locator('#issues-table tbody')).toContainText('residual is 1;');
+  const report = await jsonDownload(page, 'download-json');
+  expect(report.issueCounts).toEqual({ sum: 1 });
+  expect(report.counts.invalidRecords).toBe(1);
+  const html = await download(page, 'download-html');
+  expect(html.bytes.toString('utf8')).toContain('residual is 1;');
+  schema.sums[0].tolerance = 1;
+  await page.locator('#schema-input').fill(JSON.stringify(schema));
+  await page.locator('#audit-button').click();
+  await done(page);
+});
+
 test('Runcheck mobile tables stay within the page and language survives reload @mobile', async ({ page }) => {
   await open(page);
   await noOverflow(page);

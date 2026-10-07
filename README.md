@@ -33,6 +33,9 @@ checks. Development dependencies are needed only for browser tests.
 See [the tool index](tools/README.md) for the workflow and individual READMEs
 for commands, API examples, export formats, and limitations.
 
+Current development priorities and acceptance criteria are tracked in
+[the project goals](docs/GOALS.md).
+
 ## Web & automation portfolio
 
 日本語のWebデザインと、小規模な自動化の自主制作ポートフォリオです。

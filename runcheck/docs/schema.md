@@ -89,7 +89,9 @@ Groups are compared in the input's original record order, even when their record
 abs(R + T + A - target) <= tolerance
 ```
 
-This is not a relative or percentage tolerance. Summation uses JavaScript floating-point arithmetic. A nonfinite computed sum fails. Missing, empty, or type-invalid members skip the sum rule; their individual column issues still count. Values outside their bounds or enum still participate.
+This is not a relative or percentage tolerance. Compensated summation accumulates the columns and negative target together, retaining small residuals that ordinary addition can lose through cancellation or final-total rounding. For example, `1e16 + 1 - 1e16` has residual `1` against target `0`, and `1e16 + 1` has residual `1` against target `1e16`. Both fail a tolerance of `0.5`. Issue messages include the residual because the displayed total can still round to the target.
+
+Calculation uses JavaScript binary floating-point values, not exact decimal arithmetic; choose a tolerance appropriate to the data. Intermediate overflow or a nonfinite computed residual fails. Missing, empty, or type-invalid members skip the sum rule; their individual column issues still count. Values outside their bounds or enum still participate.
 
 ## CSV format
 
